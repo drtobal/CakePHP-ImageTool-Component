@@ -1321,14 +1321,17 @@ class ImageTool {
         for ($y = 0; $y < $h; $y++) {
             for ($x = 0; $x < $w; $x++) {
                 $rgb = imagecolorat($img, $x, $y);
+                $trueRgb = imagecolorsforindex($img, $rgb);
 
-                $r = ($rgb >> 16) & 0xFF;
-                $g = ($rgb >> 8) & 0xFF;
-                $b = $rgb & 0xFF;
+                if (!($trueRgb['red'] == $trueRgb['green'] && $trueRgb['green'] == $trueRgb['blue'] && $trueRgb['red'] == $trueRgb['blue'])) {
 
-                $gs = self::yiq($r, $g, $b);
+                    $r = ($rgb >> 16 ) & 0xFF;
+                    $g = ($rgb >> 8 ) & 0xFF;
+                    $b = $rgb & 0xFF;
 
-                imagesetpixel($img, $x, $y, $palette[$gs]);
+                    $gs = ( ( $r * 0.299 ) + ( $g * 0.587 ) + ( $b * 0.114));
+                    imagesetpixel($img, $x, $y, $palette[$gs]);
+                }
             }
         }
 
@@ -1340,20 +1343,13 @@ class ImageTool {
     }
 
     /**
-     * Helper function to covert color to grayscale
-     */
-    public static function yiq($r, $g, $b) {
-        return (($r * 0.299) + ($g * 0.587) + ($b * 0.114));
-    }
-
-    /**
      * Perform afterCallbacks on specified image
      *
      * @param resource $im Image to perform callback on
      * @param mixed $functions Callback functions and their arguments
      * @return boolean
      */
-    public static function afterCallbacks(&$im, $functions) {
+    public static function afterCallbacks(& $im, $functions) {
         if (empty($functions)) {
             return true;
         }
@@ -1400,14 +1396,14 @@ class ImageTool {
      * @return mixed
      */
     public static function hex2rgb($color) {
-        if ($color[0] == '#') {
+        if ($color [0] == '#') {
             $color = substr($color, 1);
         }
 
         if (strlen($color) == 6) {
-            list($r, $g, $b) = [$color[0] . $color[1], $color[2] . $color[3], $color[4] . $color[5]];
+            list($r, $g, $b) = [$color [0] . $color[1], $color [2] . $color[3], $color [4] . $color[5]];
         } else if (strlen($color) == 3) {
-            list($r, $g, $b) = [$color[0] . $color[0], $color[1] . $color[1], $color[2] . $color[2]];
+            list($r, $g, $b) = [$color [0] . $color[0], $color [1] . $color[1], $color [2] . $color[2]];
         } else {
             return false;
         }
@@ -1431,9 +1427,9 @@ class ImageTool {
      * @param int $px Number of pixels the text border will be
      * @return mixed GD resource
      */
-    public static function imagettfstroketext(&$image, $size, $angle, $x, $y, &$textcolor, &$strokecolor, $fontfile, $text, $px) {
-        for ($c1 = ($x - abs($px)); $c1 <= ($x + abs($px)); $c1++) {
-            for ($c2 = ($y - abs($px)); $c2 <= ($y + abs($px)); $c2++) {
+    public static function imagettfstroketext(& $image, $size, $angle, $x, $y, & $textcolor, & $strokecolor, $fontfile, $text, $px) {
+        for ($c1 = ( $x - abs($px) ); $c1 <= ( $x + abs($px) ); $c1++) {
+            for ($c2 = ( $y - abs($px) ); $c2 <= ( $y + abs($px) ); $c2++) {
                 imagettftext($image, $size, $angle, $c1, $c2, $strokecolor, $fontfile, $text);
             }
         }
